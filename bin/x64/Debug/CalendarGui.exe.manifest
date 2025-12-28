@@ -43,14 +43,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="CalendarGui.exe" size="601544">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="CalendarGui.exe" size="602056">
       <assemblyIdentity name="CalendarGui" version="1.0.0.0" language="neutral" processorArchitecture="amd64" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>x5b+AFgUoi+K4WaswXGHn0UTsw6gplrQ4dN1Qa4XlUQ=</dsig:DigestValue>
+        <dsig:DigestValue>b78ZgbQznmlRBEtpFHQeyGBjwlkmIRQIxZTisP/mdRU=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

@@ -15,7 +15,7 @@ namespace CalendarGui
     {
         private const string DbPath = "events.db";
 
-        // ✅ Telegram
+        // Telegram
         private static readonly HttpClient http = new HttpClient();
         private const string TELEGRAM_BOT_TOKEN = "8354043798:AAHZmXHV4efi7CFMCJtMPDpr6JQBAoFKfe8";
         private const string TELEGRAM_CHAT_ID = "8069386533";
@@ -23,25 +23,24 @@ namespace CalendarGui
         private enum AppLanguage { Turkish, English, Bosnian }
         private AppLanguage currentLanguage = AppLanguage.Turkish;
 
-        private string msgEmptyDesc;
-        private string msgSelectForDelete;
-        private string msgNotFound;
-        private Button buttonAllDates;
-        private string msgNoEvents;
+        private string messageEmptyDesc_;
+        private string messageSelectForDelete_;
+        private string messageNotFound_;
+        private Button buttonAllDates_;
+        private string messageNoEvents_;
 
 
         private Dictionary<AppLanguage, Dictionary<string, string>> specialDays;
-        private string currentSpecialDayName;
+        private string currentSpecialDayName_;
 
         private Label labelSpecialDay;
         private SpecialCalendar specialCalendar;
         private HashSet<string> eventDatesForMonth = new HashSet<string>();
 
-        // ✅ Toast tekrarını engelle
+      
         private DateTime? _lastToastDate = null;
         private DateTime _lastToastAt = DateTime.MinValue;
 
-        // ✅ Toast içindeki emoji eşleme (MM-dd)
         private readonly Dictionary<string, string> specialDayEmojis = new Dictionary<string, string>
         {
             ["01-01"] = "🎅",
@@ -61,13 +60,13 @@ namespace CalendarGui
             ["12-25"] = "🎄"
         };
 
-        private string GetSpecialEmoji(DateTime date)
+        private string GetSpecialEmoji_(DateTime date)
         {
             string key = date.ToString("MM-dd", CultureInfo.InvariantCulture);
             return specialDayEmojis.TryGetValue(key, out var emj) ? emj : "✨";
         }
 
-        private void TryShowSpecialToast(DateTime date)
+        private void TryShowSpecialToast_(DateTime date)
         {
             if (specialDays == null) return;
             if (!specialDays.TryGetValue(currentLanguage, out var dict)) return;
@@ -75,7 +74,7 @@ namespace CalendarGui
             string key = date.ToString("MM-dd", CultureInfo.InvariantCulture);
             if (!dict.TryGetValue(key, out string dayName)) return;
 
-            // Çift tetiklenmeyi engelle (calendar seçimi -> picker ValueChanged gibi)
+
             if (_lastToastDate.HasValue && _lastToastDate.Value.Date == date.Date)
             {
                 if ((DateTime.Now - _lastToastAt).TotalMilliseconds < 900)
@@ -89,13 +88,13 @@ namespace CalendarGui
                        : currentLanguage == AppLanguage.Bosnian ? "Poseban dan"
                        : "Özel gün";
 
-            string emoji = GetSpecialEmoji(date);
+            string emoji = GetSpecialEmoji_(date);
 
-            // ✅ Toast MERKEZDE + emoji toast içinde
+          
             SpecialDayToast.ShowToast(this, title, emoji, dayName);
         }
 
-        // ✅ Takvimin ay + gün isimlerinin dili
+      
         private void ApplyCalendarCulture()
         {
             if (specialCalendar == null) return;
@@ -116,7 +115,7 @@ namespace CalendarGui
             specialCalendar.Invalidate();
         }
 
-        // Konsept 3 renkleri
+       
         private readonly Color C_BG = Color.FromArgb(245, 243, 255);
         private readonly Color C_CARD = Color.White;
         private readonly Color C_TEXT = Color.FromArgb(17, 24, 39);
@@ -126,14 +125,14 @@ namespace CalendarGui
         private readonly Color C_DANGER = Color.FromArgb(244, 63, 94);
         private readonly Color C_BORDER = Color.FromArgb(229, 231, 235);
 
-        // Sol panel ölçüleri
+       
         private const int LEFT_WRAP_WIDTH = 360;
         private const int LEFT_WRAP_MARGIN = 20;
         private const int GAP = 30;
 
         private bool _concept3LeftBuilt = false;
 
-        // Sağ taraf panelleri
+       
         private Guna2Panel panelTopBar;
         private Guna2Panel panelInputRow;
         private Guna2Panel panelEventsCard;
@@ -146,9 +145,9 @@ namespace CalendarGui
             this.AcceptButton = buttonAdd;
 
             this.KeyPreview = true;
-            this.KeyDown += Form1_KeyDown;
+            this.KeyDown += Form1_KeyDown_;
             this.MouseDown += Form1_MouseDown;
-            this.Resize += Form1_Resize;
+            this.Resize += Form1_Resize_;
 
             if (guna2DateTimePicker1 != null)
             {
@@ -156,7 +155,7 @@ namespace CalendarGui
                 guna2DateTimePicker1.MouseDown += guna2DateTimePicker1_MouseDown;
             }
 
-            // ✅ Enter textbox'ta iken direkt eklesin + bip sesi olmasın
+         
             if (textBoxEvent != null)
             {
                 textBoxEvent.KeyDown += (s, e) =>
@@ -191,18 +190,18 @@ namespace CalendarGui
                     comboLanguage.SelectedIndex = 0;
             }
 
-            ApplyConcept3Theme();
+            ApplyConcept3Theme_();
 
-            InitializeSpecialDays();
-            ApplyLanguage();
+            InitializeSpecialDays_();
+            ApplyLanguage_();
 
             specialCalendar = new SpecialCalendar();
             specialCalendar.CurrentMonth = guna2DateTimePicker1.Value;
 
-            // ✅ takvim dili uygula
+
             ApplyCalendarCulture();
 
-            // ✅ Özel gün kontrolü
+           
             specialCalendar.IsSpecialDay = date =>
             {
                 if (specialDays != null && specialDays.TryGetValue(currentLanguage, out var dict))
@@ -213,39 +212,38 @@ namespace CalendarGui
                 return false;
             };
 
-            // ✅ Etkinlik günü kontrolü
             specialCalendar.HasEvent = date =>
             {
                 string key = date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
                 return eventDatesForMonth.Contains(key);
             };
 
-            // ✅ Seçim değişince picker güncellensin + toast
+           
             specialCalendar.SelectedDateChanged += date =>
             {
                 if (guna2DateTimePicker1 != null)
                     guna2DateTimePicker1.Value = date;
 
-                TryShowSpecialToast(date.Date);
+                TryShowSpecialToast_(date.Date);
             };
 
             this.Controls.Add(specialCalendar);
 
-            InitializeDatabase();
-            LoadEventsForSelectedDate();
+            InitializeDatabase_();
+            LoadEventsForSelectedDate_();
             RefreshEventDatesForMonth(guna2DateTimePicker1.Value);
 
             ShowSpecialDayIfExists(guna2DateTimePicker1.Value.Date);
 
-            BuildConcept3LeftColumn();
-            BuildRightSideLayout();
+            BuildConcept3LeftColumn_();
+            BuildRightSideLayout_();
 
             specialCalendar.SelectedDate = guna2DateTimePicker1.Value.Date;
             specialCalendar.Invalidate();
         }
 
-        // ✅ Telegram mesaj gönderme
-        private async Task SendTelegramMessageAsync(string message)
+
+        private async Task SendTelegramMessageAsync_(string message)
         {
             try
             {
@@ -260,14 +258,13 @@ namespace CalendarGui
             }
             catch
             {
-                // sessiz geç
+       
             }
         }
 
-        // ---------------------------------------------------------
-        // Tema & Stil
-        // ---------------------------------------------------------
-        private void ApplyConcept3Theme()
+
+
+        private void ApplyConcept3Theme_()
         {
             this.BackColor = C_BG;
             this.ForeColor = C_TEXT;
@@ -300,13 +297,13 @@ namespace CalendarGui
                 comboLanguage.ForeColor = C_TEXT;
             }
 
-            StyleEventTextBox(textBoxEvent);
-            StyleButton(buttonAdd, isDanger: false);
-            StyleButton(buttonDelete, isDanger: true);
-            StyleListBoxAsCards(listBoxEvents);
+            StyleEventTextBox_(textBoxEvent);
+            StyleButton_(buttonAdd, isDanger: false);
+            StyleButton_(buttonDelete, isDanger: true);
+            StyleListBoxAsCards_(listBoxEvents);
         }
 
-        private void StyleEventTextBox(TextBox tb)
+        private void StyleEventTextBox_(TextBox tb)
         {
             if (tb == null) return;
             tb.BackColor = C_CARD;
@@ -315,7 +312,7 @@ namespace CalendarGui
             tb.Font = new Font("Segoe UI", 10F, FontStyle.Regular);
         }
 
-        private void StyleButton(Control btn, bool isDanger)
+        private void StyleButton_(Control btn, bool isDanger)
         {
             if (btn == null) return;
 
@@ -345,7 +342,7 @@ namespace CalendarGui
             }
         }
 
-        private void StyleListBoxAsCards(ListBox lb)
+        private void StyleListBoxAsCards_(ListBox lb)
         {
             if (lb == null) return;
 
@@ -356,11 +353,11 @@ namespace CalendarGui
             lb.ItemHeight = 46;
             lb.DrawMode = DrawMode.OwnerDrawFixed;
 
-            lb.DrawItem -= ListBox_DrawItem_Concept3;
-            lb.DrawItem += ListBox_DrawItem_Concept3;
+            lb.DrawItem -= ListBox_DrawItem_Concept3_;
+            lb.DrawItem += ListBox_DrawItem_Concept3_;
         }
 
-        private void ListBox_DrawItem_Concept3(object sender, DrawItemEventArgs e)
+        private void ListBox_DrawItem_Concept3_(object sender, DrawItemEventArgs e)
         {
             var lb = (ListBox)sender;
             e.DrawBackground();
@@ -377,7 +374,7 @@ namespace CalendarGui
             Color fill = selected ? C_ACCENT_SOFT : C_CARD;
             Color border = selected ? C_ACCENT : C_BORDER;
 
-            using (GraphicsPath path = RoundedRect(r, 14))
+            using (GraphicsPath path = RoundedRect_(r, 14))
             using (SolidBrush brush = new SolidBrush(fill))
             using (Pen pen = new Pen(border, 1))
             using (SolidBrush textBrush = new SolidBrush(C_TEXT))
@@ -393,7 +390,7 @@ namespace CalendarGui
             e.DrawFocusRectangle();
         }
 
-        private GraphicsPath RoundedRect(Rectangle bounds, int radius)
+        private GraphicsPath RoundedRect_(Rectangle bounds, int radius)
         {
             int d = radius * 2;
             GraphicsPath path = new GraphicsPath();
@@ -405,10 +402,8 @@ namespace CalendarGui
             return path;
         }
 
-        // ---------------------------------------------------------
-        // Sol panel
-        // ---------------------------------------------------------
-        private void BuildConcept3LeftColumn()
+     
+        private void BuildConcept3LeftColumn_()
         {
             if (_concept3LeftBuilt) return;
             _concept3LeftBuilt = true;
@@ -443,9 +438,9 @@ namespace CalendarGui
             tlp.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             leftWrap.Controls.Add(tlp);
 
-            var card1 = MakeCardPanel();
-            var card2 = MakeCardPanel();
-            var card3 = MakeCardPanel();
+            var card1 = MakeCardPanel_();
+            var card2 = MakeCardPanel_();
+            var card3 = MakeCardPanel_();
 
             card1.Margin = new Padding(0, 0, 0, 18);
             card2.Margin = new Padding(0, 0, 0, 18);
@@ -509,7 +504,7 @@ namespace CalendarGui
             }
         }
 
-        private Guna2Panel MakeCardPanel()
+        private Guna2Panel MakeCardPanel_()
         {
             var p = new Guna2Panel
             {
@@ -525,10 +520,8 @@ namespace CalendarGui
             return p;
         }
 
-        // ---------------------------------------------------------
-        // Sağ taraf layout
-        // ---------------------------------------------------------
-        private void BuildRightSideLayout()
+ 
+        private void BuildRightSideLayout_()
         {
             int startX = LEFT_WRAP_MARGIN + LEFT_WRAP_WIDTH + GAP;
 
@@ -604,29 +597,28 @@ namespace CalendarGui
                 buttonDelete.Left = rightX - buttonDelete.Width;
                 rightX = buttonDelete.Left - 10;
             }
-            // ✅ "Tüm Tarihler" butonu (DB’deki tüm event tarihlerini gösterir)
-            if (buttonAllDates == null)
+           
+
+            if (buttonAllDates_ == null)
             {
-                buttonAllDates = new Button
+                buttonAllDates_ = new Button
                 {
                     Name = "buttonAllDates",
                     Text = "Tüm Tarihler",
                     FlatStyle = FlatStyle.Flat
                 };
-                buttonAllDates.FlatAppearance.BorderSize = 0;
-                buttonAllDates.Click += buttonAllDates_Click;
+                buttonAllDates_.FlatAppearance.BorderSize = 0;
+                buttonAllDates_.Click += buttonAllDates_Click_;
 
-                // Tema ile aynı görünsün
-                StyleButton(buttonAllDates, isDanger: false);
+                StyleButton_(buttonAllDates_, isDanger: false);
             }
 
-            // Yerleştir
-            buttonAllDates.Parent = panelTopBar;
-            buttonAllDates.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            buttonAllDates.Size = new Size(140, 36);
-            buttonAllDates.Top = 18;
-            buttonAllDates.Left = rightX - buttonAllDates.Width;
-            rightX = buttonAllDates.Left - 10;
+            buttonAllDates_.Parent = panelTopBar;
+            buttonAllDates_.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonAllDates_.Size = new Size(140, 36);
+            buttonAllDates_.Top = 18;
+            buttonAllDates_.Left = rightX - buttonAllDates_.Width;
+            rightX = buttonAllDates_.Left - 10;
 
 
             if (buttonAdd != null)
@@ -639,7 +631,7 @@ namespace CalendarGui
                 rightX = buttonAdd.Left - 10;
             }
 
-            // ✅ Special day yazısını top bar'a, başlık ile Add butonu arasına ortala
+          
             var titleLbl = panelTopBar.Controls["lblTopTitle"] as Label;
 
             if (labelSpecialDay != null)
@@ -663,7 +655,7 @@ namespace CalendarGui
                 labelSpecialDay.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             }
 
-            // Input row
+         
             if (panelInputRow == null)
             {
                 panelInputRow = new Guna2Panel
@@ -719,7 +711,7 @@ namespace CalendarGui
                 textBoxEvent.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             }
 
-            // Events card
+      
             if (panelEventsCard == null)
             {
                 panelEventsCard = new Guna2Panel
@@ -753,10 +745,8 @@ namespace CalendarGui
             if (title != null) title.Text = this.Text;
         }
 
-        // ---------------------------------------------------------
-        // Shortcuts / focus
-        // ---------------------------------------------------------
-        private void Form1_KeyDown(object sender, KeyEventArgs e)
+    
+        private void Form1_KeyDown_(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Delete)
             {
@@ -783,15 +773,14 @@ namespace CalendarGui
             this.ActiveControl = null;
         }
 
-        private void Form1_Resize(object sender, EventArgs e)
+        private void Form1_Resize_(object sender, EventArgs e)
         {
-            BuildRightSideLayout();
+            BuildRightSideLayout_();
         }
 
-        // ---------------------------------------------------------
         // DB
-        // ---------------------------------------------------------
-        private void InitializeDatabase()
+       
+        private void InitializeDatabase_()
         {
             using (var connection = new SQLiteConnection("Data Source=" + DbPath))
             {
@@ -843,7 +832,7 @@ namespace CalendarGui
             }
         }
 
-        private void LoadEventsForSelectedDate()
+        private void LoadEventsForSelectedDate_()
         {
             DateTime date = guna2DateTimePicker1.Value.Date;
             listBoxEvents.Items.Clear();
@@ -931,9 +920,7 @@ namespace CalendarGui
             }
         }
 
-        // ---------------------------------------------------------
-        // Dil
-        // ---------------------------------------------------------
+    
         private void HandleLanguageChange()
         {
             int index = comboLanguage.SelectedIndex;
@@ -943,8 +930,8 @@ namespace CalendarGui
             else if (index == 2) currentLanguage = AppLanguage.Bosnian;
             else currentLanguage = AppLanguage.Turkish;
 
-            ApplyLanguage();
-            ApplyCalendarCulture(); // ✅ ay + gün isimleri değişsin
+            ApplyLanguage_();
+            ApplyCalendarCulture(); 
 
             if (guna2DateTimePicker1 != null)
                 ShowSpecialDayIfExists(guna2DateTimePicker1.Value.Date);
@@ -957,59 +944,59 @@ namespace CalendarGui
                 if (title != null) title.Text = this.Text;
             }
 
-            BuildRightSideLayout(); // ✅ label/textbox hizaları da düzelsin
+            BuildRightSideLayout_(); 
         }
 
         private void comboLanguage_SelectedIndexChanged(object sender, EventArgs e) => HandleLanguageChange();
         private void comboLanguage_SelectedIndexChanged_1(object sender, EventArgs e) => HandleLanguageChange();
 
-        private void ApplyLanguage()
+        private void ApplyLanguage_()
         {
             switch (currentLanguage)
             {
                 case AppLanguage.Turkish:
-                    msgNoEvents = "Henüz hiç etkinlik yok.";
-                    if (buttonAllDates != null) buttonAllDates.Text = "Tüm Tarihler";
+                    messageNoEvents_ = "Henüz hiç etkinlik yok.";
+                    if (buttonAllDates_ != null) buttonAllDates_.Text = "Tüm Tarihler";
 
                     this.Text = "Takvim";
                     buttonAdd.Text = "Ekle";
                     buttonDelete.Text = "Sil";
-                    msgEmptyDesc = "Etkinlik açıklaması boş olamaz.";
-                    msgSelectForDelete = "Silmek için listeden bir etkinlik seç.";
-                    msgNotFound = "Etkinlik bulunamadı (ID geçersiz).";
+                    messageEmptyDesc_ = "Etkinlik açıklaması boş olamaz.";
+                    messageSelectForDelete_ = "Silmek için listeden bir etkinlik seç.";
+                    messageNotFound_ = "Etkinlik bulunamadı (ID geçersiz).";
                     if (label1 != null) label1.Text = "Etkinliği gir:";
                     break;
 
                 case AppLanguage.English:
-                    msgNoEvents = "There are no events yet.";
-                    if (buttonAllDates != null) buttonAllDates.Text = "All Dates";
+                    messageNoEvents_ = "There are no events yet.";
+                    if (buttonAllDates_ != null) buttonAllDates_.Text = "All Dates";
 
                     this.Text = "Calendar";
                     buttonAdd.Text = "Add";
                     buttonDelete.Text = "Delete";
-                    msgEmptyDesc = "Event description cannot be empty.";
-                    msgSelectForDelete = "Select an event from the list to delete.";
-                    msgNotFound = "No event found (invalid ID).";
+                    messageEmptyDesc_ = "Event description cannot be empty.";
+                    messageSelectForDelete_ = "Select an event from the list to delete.";
+                    messageNotFound_ = "No event found (invalid ID).";
                     if (label1 != null) label1.Text = "Enter the event:";
                     break;
 
                 case AppLanguage.Bosnian:
-                    msgNoEvents = "Još nema događaja.";
-                    if (buttonAllDates != null) buttonAllDates.Text = "Svi Datumi";
+                    messageNoEvents_ = "Još nema događaja.";
+                    if (buttonAllDates_ != null) buttonAllDates_.Text = "Svi Datumi";
 
                     this.Text = "Kalendar";
                     buttonAdd.Text = "Dodaj";
                     buttonDelete.Text = "Obriši";
-                    msgEmptyDesc = "Opis događaja ne može biti prazan.";
-                    msgSelectForDelete = "Odaberi događaj iz liste za brisanje.";
-                    msgNotFound = "Događaj nije pronađen (neispravan ID).";
+                    messageEmptyDesc_ = "Opis događaja ne može biti prazan.";
+                    messageSelectForDelete_ = "Odaberi događaj iz liste za brisanje.";
+                    messageNotFound_ = "Događaj nije pronađen (neispravan ID).";
                     if (label1 != null) label1.Text = "Unesite događaj:";
                     break;
             }
-            UpdateFlag();
+            Update_Flag();
         }
 
-        private void UpdateFlag()
+        private void Update_Flag()
         {
             if (pictureFlag == null) return;
 
@@ -1029,12 +1016,10 @@ namespace CalendarGui
             }
         }
 
-        // ---------------------------------------------------------
-        // Date picker
-        // ---------------------------------------------------------
+      
         private void guna2DateTimePicker1_ValueChanged(object sender, EventArgs e)
         {
-            LoadEventsForSelectedDate();
+            LoadEventsForSelectedDate_();
             ShowSpecialDayIfExists(guna2DateTimePicker1.Value.Date);
 
             if (specialCalendar != null)
@@ -1045,24 +1030,22 @@ namespace CalendarGui
                 specialCalendar.Invalidate();
             }
 
-            TryShowSpecialToast(guna2DateTimePicker1.Value.Date);
+            TryShowSpecialToast_ (guna2DateTimePicker1.Value.Date);
         }
 
         private void guna2DateTimePicker1_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Right) return;
-            if (string.IsNullOrEmpty(currentSpecialDayName)) return;
+            if (string.IsNullOrEmpty(currentSpecialDayName_)) return;
 
             string title = currentLanguage == AppLanguage.English ? "Special Day"
                          : currentLanguage == AppLanguage.Bosnian ? "Poseban dan"
                          : "Özel Gün";
 
-            MessageBox.Show(currentSpecialDayName, title, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(currentSpecialDayName_, title, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        // ---------------------------------------------------------
-        // Add / Delete
-        // ---------------------------------------------------------
+       
         private void buttonAdd_Click(object sender, EventArgs e)
         {
             DateTime date = guna2DateTimePicker1.Value.Date;
@@ -1070,18 +1053,18 @@ namespace CalendarGui
 
             if (string.IsNullOrWhiteSpace(desc))
             {
-                MessageBox.Show(msgEmptyDesc);
+                MessageBox.Show(messageEmptyDesc_);
                 return;
             }
 
             SaveEventToDatabase(date, desc);
             textBoxEvent.Clear();
-            LoadEventsForSelectedDate();
+            LoadEventsForSelectedDate_();
 
             RefreshEventDatesForMonth(guna2DateTimePicker1.Value);
             specialCalendar?.Invalidate();
 
-            _ = SendTelegramMessageAsync($"📅 Yeni etkinlik eklendi!\nTarih: {date:yyyy-MM-dd}\nAçıklama: {desc}");
+            _ = SendTelegramMessageAsync_($"📅 Yeni etkinlik eklendi!\nTarih: {date:yyyy-MM-dd}\nAçıklama: {desc}");
         }
 
         private void buttonDelete_Click(object sender, EventArgs e)
@@ -1089,26 +1072,24 @@ namespace CalendarGui
             EventItem item = listBoxEvents.SelectedItem as EventItem;
             if (item == null)
             {
-                MessageBox.Show(msgSelectForDelete);
+                MessageBox.Show(messageSelectForDelete_);
                 return;
             }
 
             if (DeleteEventById(item.Id))
             {
-                LoadEventsForSelectedDate();
+                LoadEventsForSelectedDate_();
                 RefreshEventDatesForMonth(guna2DateTimePicker1.Value);
                 specialCalendar?.Invalidate();
             }
             else
             {
-                MessageBox.Show(msgNotFound);
+                MessageBox.Show(messageNotFound_);
             }
         }
 
-        // ---------------------------------------------------------
-        // Special days
-        // ---------------------------------------------------------
-        private void InitializeSpecialDays()
+        
+        private void InitializeSpecialDays_()
         {
             specialDays = new Dictionary<AppLanguage, Dictionary<string, string>>();
 
@@ -1156,7 +1137,7 @@ namespace CalendarGui
 
             if (dict.TryGetValue(key, out string dayName))
             {
-                currentSpecialDayName = dayName;
+                currentSpecialDayName_ = dayName;
 
                 string caption = currentLanguage == AppLanguage.English ? "Special day: " + dayName
                                : currentLanguage == AppLanguage.Bosnian ? "Poseban dan: " + dayName
@@ -1167,7 +1148,7 @@ namespace CalendarGui
             }
             else
             {
-                currentSpecialDayName = null;
+                currentSpecialDayName_ = null;
                 labelSpecialDay.Text = "";
                 labelSpecialDay.Visible = false;
             }
@@ -1180,21 +1161,21 @@ namespace CalendarGui
             public override string ToString() => Text;
         }
 
-        // Designer boş event’leri (kalsın)
+     
         private void Form1_Load(object sender, EventArgs e) { }
         private void textBoxEvent_TextChanged(object sender, EventArgs e) { }
         private void buttonAdd_Click_1(object sender, EventArgs e) { buttonAdd_Click(sender, e); }
         private void buttonDelete_Click_1(object sender, EventArgs e) { buttonDelete_Click(sender, e); }
         private void label1_Click(object sender, EventArgs e) { }
 
-        private void buttonAllDates_Click(object sender, EventArgs e)
+        private void buttonAllDates_Click_(object sender, EventArgs e)
         {
             ShowAllEventDatesDialog();
         }
 
         private void ShowAllEventDatesDialog()
         {
-            var items = new List<EventDateItem>();
+            var items = new List<EventDateItem_>();
 
             using (var connection = new SQLiteConnection("Data Source=" + DbPath))
             {
@@ -1217,7 +1198,7 @@ namespace CalendarGui
                             if (DateTime.TryParseExact(dateStr, "yyyy-MM-dd", CultureInfo.InvariantCulture,
                                 DateTimeStyles.None, out var dt))
                             {
-                                items.Add(new EventDateItem { Date = dt, Count = count });
+                                items.Add(new EventDateItem_ { Date = dt, Count = count });
                             }
                         }
                     }
@@ -1226,7 +1207,7 @@ namespace CalendarGui
 
             if (items.Count == 0)
             {
-                MessageBox.Show(msgNoEvents ?? "No events.", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(messageNoEvents_ ?? "No events.", this.Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -1257,10 +1238,9 @@ namespace CalendarGui
             foreach (var it in items)
                 lb.Items.Add(it);
 
-            // ✅ Çift tıkla: o tarihe git
             lb.DoubleClick += (s, e) =>
             {
-                if (lb.SelectedItem is EventDateItem it)
+                if (lb.SelectedItem is EventDateItem_ it)
                 {
                     if (guna2DateTimePicker1 != null)
                         guna2DateTimePicker1.Value = it.Date;
@@ -1271,15 +1251,15 @@ namespace CalendarGui
 
             var bottom = new Panel { Dock = DockStyle.Bottom, Height = 56, Padding = new Padding(12), BackColor = Color.White };
 
-            var btnClose = new Button
+            var btnClose_ = new Button
             {
                 Text = currentLanguage == AppLanguage.English ? "Close" :
                        currentLanguage == AppLanguage.Bosnian ? "Zatvori" : "Kapat",
                 Dock = DockStyle.Right,
                 Width = 110
             };
-            StyleButton(btnClose, isDanger: true);
-            btnClose.Click += (s, e) => dlg.Close();
+            StyleButton_(btnClose_, isDanger: true);
+            btnClose_.Click += (s, e) => dlg.Close();
 
             var hint = new Label
             {
@@ -1292,7 +1272,7 @@ namespace CalendarGui
                 Font = new Font("Segoe UI", 9f, FontStyle.Regular)
             };
 
-            bottom.Controls.Add(btnClose);
+            bottom.Controls.Add(btnClose_);
             bottom.Controls.Add(hint);
 
             dlg.Controls.Add(lb);
@@ -1301,14 +1281,14 @@ namespace CalendarGui
             dlg.ShowDialog(this);
         }
 
-        private class EventDateItem
+        private class EventDateItem_
         {
             public DateTime Date { get; set; }
             public int Count { get; set; }
 
             public override string ToString()
             {
-                // Listede "2025-12-19 (2)" gibi görünsün
+           
                 return $"{Date:yyyy-MM-dd} ({Count})";
             }
         }

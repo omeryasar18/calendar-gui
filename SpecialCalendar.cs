@@ -35,10 +35,9 @@ namespace CalendarGui
         }
         private DateTime _selectedDate = DateTime.Today;
 
-        // ✅ Dil/culture (Form1 bunu TR/EN/BS olarak set edecek)
         public CultureInfo CalendarCulture { get; set; } = CultureInfo.GetCultureInfo("tr-TR");
 
-        // Tema
+     
         public Color CalendarBackColor { get; set; } = Color.White;
         public Color TextColor { get; set; } = Color.FromArgb(17, 24, 39);
         public Color MutedTextColor { get; set; } = Color.FromArgb(107, 114, 128);
@@ -46,11 +45,11 @@ namespace CalendarGui
         public Color AccentSoftColor { get; set; } = Color.FromArgb(209, 250, 229);
         public Color BorderColor { get; set; } = Color.FromArgb(229, 231, 235);
 
-        // Özel gün (kırmızı dolu)
+       
         public Color SpecialDayFillColor { get; set; } = Color.FromArgb(244, 63, 94);
         public Color SpecialDayTextColor { get; set; } = Color.White;
 
-        // Event günü (mavi dolu)
+     
         public Color EventDayFillColor { get; set; } = Color.FromArgb(59, 130, 246);
         public Color EventDayTextColor { get; set; } = Color.White;
 
@@ -81,16 +80,16 @@ namespace CalendarGui
             using (var bg = new SolidBrush(CalendarBackColor))
                 g.FillRectangle(bg, r);
 
-            // ✅ Culture seç
+            
             var culture = CalendarCulture ?? CultureInfo.CurrentCulture;
 
-            // Header (ay adı bu culture'a göre değişecek)
+          
             string header = CurrentMonth.ToString("MMMM yyyy", culture);
             using (var fHeader = new Font("Segoe UI", 11f, FontStyle.Bold))
             using (var bText = new SolidBrush(TextColor))
                 g.DrawString(header, fHeader, bText, r.X, r.Y);
 
-            // ✅ Weekdays (culture'dan al, Pazartesi başlangıçlı)
+            
             var dtf = culture.DateTimeFormat;
             string[] dn = dtf.AbbreviatedDayNames; // 0=Sunday
             string[] wd = new string[7]
@@ -153,20 +152,20 @@ namespace CalendarGui
                     bool special = IsSpecialDay?.Invoke(date) == true;
                     bool hasEvent = HasEvent?.Invoke(date) == true;
 
-                    // Hücre alanı
+                   
                     var cellRect = new RectangleF(x + 3, y + 3, cellW - 6, cellH - 6);
 
-                    // Öncelik: Special (kırmızı) > Event (mavi)
+                   
                     if (special)
                         g.FillRectangle(bSpecialFill, cellRect);
                     else if (hasEvent)
                         g.FillRectangle(bEventFill, cellRect);
 
-                    // Seçili gün: border
+                 
                     if (selected)
                         g.DrawRectangle(pSelected, cellRect.X, cellRect.Y, cellRect.Width, cellRect.Height);
 
-                    // Gün numarası (sol üst)
+             
                     string s = dayIndex.ToString(CultureInfo.InvariantCulture);
 
                     Brush numBrush =
@@ -178,7 +177,7 @@ namespace CalendarGui
                     float numY = y + 6;
                     g.DrawString(s, fDay, numBrush, numX, numY);
 
-                    // ✅ Event dot (istersen kalsın)
+                  
                     if (hasEvent)
                     {
                         using (var bDot = new SolidBrush(Color.White))
@@ -191,6 +190,80 @@ namespace CalendarGui
                 }
             }
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
